@@ -106,8 +106,7 @@ for switch in switches:
 
       # Add the vlan to the dictionary for this switch
           vlans_dict.update({
-#              vlan : []
-            vlan + "," + vlan_name : []
+            vlan + ":" + vlan_name : []
           })
 
           continue
@@ -162,16 +161,16 @@ for vlan in sorted(switches["fqdr-core-1"]["vlans"]):
   if options.verbose is True: sys.stdout.write("Checking vlans: " + vlan + "\n")
 
   try:
-#    if compare_lists(switches["fqdr-core-1"]["vlans"][vlan], switches["rd-core-1"]["vlans"][vlan]) is False:
-#      sys.stdout.write("vlan " + vlan + " differs between rd-core-1 and fqdr-core-1!\n")
+    if compare_lists(switches["fqdr-core-1"]["vlans"][vlan], switches["rd-core-1"]["vlans"][vlan]) is False:
+      sys.stdout.write("vlan " + vlan + " differs between rd-core-1 and fqdr-core-1!\n")
 
-      for rule in switches["fqdr-core-1"]["vlans"][vlan]:
-        if rule not in switches["rd-core-1"]["vlans"][vlan]:
-          sys.stdout.write("     Missing vlan on rd-core-1: " + rule + "\n")
-
-      for rule in switches["rd-core-1"]["vlans"][vlan]:
-        if rule not in switches["fqdr-core-1"]["vlans"][vlan]:
-          sys.stdout.write("     Missing rule on rd-core-1: " + rule + "\n")
+#      for rule in switches["fqdr-core-1"]["vlans"][vlan]:
+#        if rule not in switches["rd-core-1"]["vlans"][vlan]:
+#          sys.stdout.write("     Missing vlan on rd-core-1: " + rule + "\n")
+#
+#      for rule in switches["rd-core-1"]["vlans"][vlan]:
+#        if rule not in switches["fqdr-core-1"]["vlans"][vlan]:
+#          sys.stdout.write("     Missing rule on rd-core-1: " + rule + "\n")
 
   except KeyError:
     sys.stdout.write("vlan " + vlan + vlan_name + " is missing on rd-core-1 (exists on fqdr-core-1)!\n")
