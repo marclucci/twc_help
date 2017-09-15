@@ -128,16 +128,16 @@ for switch in switches:
 #
 # Compare the lists 
 
-if options.verbose is True: sys.stdout.write("Comparing vlans for rd-core-1 vs fqdr-core-1 ...\n")
-sys.stdout.write("\n")
-
-for vlan in sorted(switches["rd-core-1"]["vlans"]):
-  if options.verbose is True: sys.stdout.write("Checking vlans: " + vlan + "\n")
-
-                      
-  try:
-    if compare_lists(switches["rd-core-1"]["vlans"][vlan], switches["fqdr-core-1"]["vlans"][vlan]) is False:
-      sys.stdout.write("vlan " + vlan + " differs between fqdr-core-1 and rd-core-1!\n")
+#if options.verbose is True: sys.stdout.write("Comparing vlans for rd-core-1 vs fqdr-core-1 ...\n")
+#sys.stdout.write("\n")
+#
+#for vlan in sorted(switches["rd-core-1"]["vlans"]):
+#  if options.verbose is True: sys.stdout.write("Checking vlans: " + vlan + "\n")
+#
+#                      
+#  try:
+#    if compare_lists(switches["rd-core-1"]["vlans"][vlan], switches["fqdr-core-1"]["vlans"][vlan]) is False:
+#      sys.stdout.write("vlan " + vlan + " differs between fqdr-core-1 and rd-core-1!\n")
 
 #      for rule in switches["rd-core-1"]["vlans"][vlan]:
 #        if rule not in switches["fqdr-core-1"]["vlans"][vlan]:
@@ -156,7 +156,7 @@ for vlan in sorted(switches["rd-core-1"]["vlans"]):
 
 if options.verbose is True: sys.stdout.write("Comparing vlans for dr and prod ...\n")
 sys.stdout.write("\n")
-
+#
 for vlan in sorted(switches["fqdr-core-1"]["vlans"]):
   if options.verbose is True: sys.stdout.write("Checking vlans: " + vlan + "\n")
 
