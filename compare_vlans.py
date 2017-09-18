@@ -31,11 +31,11 @@ def compare_lists(list1, list2):
 
   diff_list2 = [item for item in list2 if not item in list1]
 
-  if (len(diff_list) > 0) or (len(diff_list2) > 0):
-    return False
+#  if (len(diff_list) > 0) or (len(diff_list2) > 0):
+ #   return False
 
-  else:
-    return True
+ # else:
+#    return True
 
 
 
@@ -52,7 +52,7 @@ for switch in switches:
 
   switch_dict = switches[switch]
 
-  for config_file in glob.iglob("/tftpboot/ciscoconfg/" + switch + ".gw*"):
+  for config_file in glob.iglob(switch + ".gw*"):
     if options.verbose: sys.stdout.write("Checking file " + config_file + " ...\n")
 
     mtime = os.stat(config_file).st_mtime
@@ -77,12 +77,15 @@ for switch in switches:
   switch_dict = switches[switch]
 
   switch_dict.update({
-    "vlans" : {}
+    "vlans" : {},
+    "names" : {}
   })
 
   vlans_dict = switch_dict["vlans"]
+  names_dict = switch_dict["names"]
 
   vlan = ""
+  vlan_name = ""
 
   try:
     print ("Latest config: " + switch_dict["latest_config"])
@@ -99,76 +102,63 @@ for switch in switches:
 
     if match is not None:
         if ',' not in line:
-          vlan = line.split()[-1]
+          if 'configuration' not in line:
+            vlan = line.split()[-1]
+            vlan_name = next(config_file_handle)
+            vlan_name = vlan_name.split()[-1]
 
-          if options.verbose is True: sys.stdout.write("Found a vlan " + vlan + "\n")
+
+            if options.verbose is True: sys.stdout.write("Found a vlan " + vlan + "\n")
 
       # Add the vlan to the dictionary for this switch
           vlans_dict.update({
-            vlan : []
+            vlan : vlan_name
           })
-
-          continue
-
-    # find next vlan
-    match = re.match(" name", line)
-
-    if match is not None:
-      if options.verbose is True: sys.stdout.write("Found a new vlan " + vlan + " : " + line + "\n")
-
-      current_vlan_list = vlans_dict[vlan]
-
-      current_vlan_list.append(line)
+          names_dict.update({
+            vlan + ':' + vlan_name : [vlan_name]
+          })
 
   config_file_handle.close()
 
 
 
 #
-# Compare the lists 
+# Compare rd to dr
 
-if options.verbose is True: sys.stdout.write("Comparing vlans for rd-core-1 vs fqdr-core-1 ...\n")
-sys.stdout.write("\n")
+sys.stdout.write("\n\nVlans missing from DR\n\n\n") 
 
 for vlan in sorted(switches["rd-core-1"]["vlans"]):
-  if options.verbose is True: sys.stdout.write("Checking vlans: " + vlan + "\n")
 
   try:
-    if compare_lists(switches["rd-core-1"]["vlans"][vlan], switches["fqdr-core-1"]["vlans"][vlan]) is False:
-      sys.stdout.write("vlan " + vlan + " differs between fqdr-core-1 and rd-core-1!\n")
+    if compare_lists(switches["rd-core-1"]["vlans"][vlan], switches["fqdr-core-1"]["vlans"][vlan]) is True:
+        continue
+ #      remove the continue above to check if the names do not match  
+  #    sys.stdout.write("vlan " + vlan + " differs between fqdr-core-1 and rd-core-1!\n")
 
-      for rule in switches["rd-core-1"]["vlans"][vlan]:
-        if rule not in switches["fqdr-core-1"]["vlans"][vlan]:
-          sys.stdout.write("     Missing vlan on fqdr-core-1: " + rule + "\n")
-
-      for rule in switches["fqdr-core-1"]["vlans"][vlan]:
-        if rule not in switches["rd-core-1"]["vlans"][vlan]:
-          sys.stdout.write("     Missing vlan on rd-core-1: " + rule + "\n")
-
+ 
   except KeyError:
-    sys.stdout.write("vlan " + vlan + " is missing on fqdr-core-1 (exists on rd-core-1)!\n")
+ #     name1 = str(vlans_dict[vlan])
+  #    name1 = name1.strip("\n")
+ #     name1 = name1.split(" ")
+ #     name1 = name1[3]
+      sys.stdout.write("vlan " + vlan + " " + vlan_name + " is missing on fqdr-core-1\n")
 
 
 
-# Compare the lists 
+# Compare dr to rd
 
-if options.verbose is True: sys.stdout.write("Comparing vlans for dr and prod ...\n")
-sys.stdout.write("\n")
+sys.stdout.write("\n\nVlans missing from PROD\n\n\n") 
 
 for vlan in sorted(switches["fqdr-core-1"]["vlans"]):
-  if options.verbose is True: sys.stdout.write("Checking vlans: " + vlan + "\n")
 
   try:
-    if compare_lists(switches["fqdr-core-1"]["vlans"][vlan], switches["rd-core-1"]["vlans"][vlan]) is False:
-      sys.stdout.write("vlan " + vlan + " differs between rd-core-1 and fqdr-core-1!\n")
+     if compare_lists(switches["fqdr-core-1"]["vlans"][vlan], switches["rd-core-1"]["vlans"][vlan]) is True: 
+        continue
+#       remove the continue above to check if the names do not match      
+#       sys.stdout.write("vlan " + vlan + str(vlans_dict[vlan]) + " differs between rd-core-1 and fqdr-core-1!\n")
 
-      for rule in switches["fqdr-core-1"]["vlans"][vlan]:
-        if rule not in switches["rd-core-1"]["vlans"][vlan]:
-          sys.stdout.write("     Missing vlan on rd-core-1: " + rule + "\n")
-
-      for rule in switches["rd-core-1"]["vlans"][vlan]:
-        if rule not in switches["fqdr-core-1"]["vlans"][vlan]:
-          sys.stdout.write("     Missing rule on rd-core-1: " + rule + "\n")
 
   except KeyError:
-    sys.stdout.write("vlan " + vlan + " is missing on rd-core-1 (exists on fqdr-core-1)!\n")
+      sys.stdout.write("vlan " + vlan + " " + vlan_name + " is missing on rd-core-1\n")
+      
+
